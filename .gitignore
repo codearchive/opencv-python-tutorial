@@ -91,6 +91,8 @@ env.bak/
 venv.bak/
 .idea/
 .idea
+.ipynb
+.ipynb-checkpoints/
 
 # Spyder project settings
 .spyderproject
