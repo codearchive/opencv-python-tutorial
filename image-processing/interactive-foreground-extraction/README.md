@@ -77,3 +77,7 @@ See the result below:
 
 ![Result](source/result.png)
 
+$$ x = 1 $$
+
+
+
