@@ -76,8 +76,3 @@ What I actually did is that, I opened input image in paint application and added
 See the result below:
 
 ![Result](source/result.png)
-
-$$ x = 1 $$
-
-
-

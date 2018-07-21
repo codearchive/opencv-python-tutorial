@@ -1,10 +1,15 @@
-# Opencv-Python Tutorial
+# OpenCV-Python Tutorial
+
+----
 
 ## Contents
 
 - [Introduction to OpenCV](#Introduction-to-OpenCV)
-- [Image Processing in OpenCV]()
+- [Image Processing in OpenCV](image-processing)
   - [Interactive Foreground Extraction using GrabCut Algorithm]()
+- [Feature Detection and Description](feature-detection-and-description)
+  - [Understanding Features](feature-detection-and-description/#Understanding-Features)  
+  - [Harris Corner Detection](feature-detection-and-description/harris-corner-detection)
 
 ## Introduction to OpenCV
 

@@ -11775,14 +11775,15 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Harris-Corner-Detection">Harris Corner Detection<a class="anchor-link" href="#Harris-Corner-Detection">&#182;</a></h1><hr>
+<h1 id="Harris-Corner-Detection">Harris Corner Detection<a class="anchor-link" href="#Harris-Corner-Detection">&#182;</a></h1><p><em>You can view <a href="README.ipynb">IPyton Notebook</a> report.</em></p>
+<hr>
 <h2 id="Contents">Contents<a class="anchor-link" href="#Contents">&#182;</a></h2><ul>
 <li><a href="#GOAL">GOAL</a></li>
 <li><a href="#Theory">Theory</a></li>
 <li><a href="#Harris-Corner-Detector-in-OpenCV">Harris Corner Detector in OpenCV </a></li>
-<li><a href="#Corner-with-SubPixel Accuracy">Corner with SubPixel Accuracy </a></li>
+<li><a href="#Corner-with-SubPixel-Accuracy">Corner with SubPixel Accuracy </a></li>
 </ul>
-<h2 id="GOAL">GOAL<a class="anchor-link" href="#GOAL">&#182;</a></h2><p>In this chapter,</p>
+<h2 id="GOAL">GOAL<a class="anchor-link" href="#GOAL">&#182;</a></h2><p>In this chapter:</p>
 <ul>
 <li>We will understand the concepts behind Harris Corner Detection.</li>
 <li>We will see the functions: <a href="https://docs.opencv.org/3.4.1/dd/d1a/group__imgproc__feature.html#gac1fc3598018010880e370e2f709b4345">cv.cornerHarris()</a>, <a href="https://docs.opencv.org/3.4.1/dd/d1a/group__imgproc__feature.html#ga354e0d7c86d0d9da75de9b9701a9a87e">cv.cornerSubPix()</a>.</li>
@@ -11799,9 +11800,9 @@ div#notebook {
 <p>$$ R = det(M) - k(trace(M))^2 $$</p>
 <p>where</p>
 <ul>
-<li>$ det(M) = \lambda_1 \lambda_2 $</li>
-<li>$ trace(M) = \lambda_1 + \lambda_2 $</li>
-<li>$ \lambda_1 $ and $ \lambda_1 $ are the eigen values of M</li>
+<li>$ det(M) = \lambda_1 \lambda_2 $;</li>
+<li>$ trace(M) = \lambda_1 + \lambda_2 $;</li>
+<li>$ \lambda_1 $ and $ \lambda_1 $ are the eigen values of $ M $.</li>
 </ul>
 <p>So the values of these eigen values decide whether a region is corner, edge or flat.</p>
 <ul>
@@ -11812,6 +11813,71 @@ div#notebook {
 <p>It can be represented in a nice picture as follows:</p>
 <p><img src="data/harris-region.jpg" alt="harris-region"></p>
 <p>So the result of Harris Corner Detection is a grayscale image with these scores. Thresholding for a suitable give you the corners in the image. We will do it with a simple image.</p>
+<h2 id="Harris-Corner-Detector-in-OpenCV">Harris Corner Detector in OpenCV<a class="anchor-link" href="#Harris-Corner-Detector-in-OpenCV">&#182;</a></h2><p>OpenCV has the function <a href="https://docs.opencv.org/3.4.1/dd/d1a/group__imgproc__feature.html#gac1fc3598018010880e370e2f709b4345">cv.cornerHarris()</a> for this purpose. Its arguments are :</p>
+<ul>
+<li><strong>img</strong> - Input image, it should be grayscale and float32 type.</li>
+<li><strong>blockSize</strong> - It is the size of neighbourhood considered for corner detection.</li>
+<li><strong>ksize</strong> - Aperture parameter of Sobel derivative used.</li>
+<li><strong>k</strong> - Harris detector free parameter in the equation.</li>
+</ul>
+<p>See the example below:</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">cv2</span> <span class="kn">as</span> <span class="nn">cv</span>
+
+<span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;input-files/chessboard.png&#39;</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">dsize</span><span class="o">=</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">500</span><span class="p">),</span> <span class="n">interpolation</span><span class="o">=</span><span class="n">cv</span><span class="o">.</span><span class="n">INTER_LINEAR</span><span class="p">)</span>
+<span class="n">gray</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">cv</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>
+
+<span class="n">gray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">gray</span><span class="p">)</span>
+<span class="n">dst</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">cornerHarris</span><span class="p">(</span><span class="n">gray</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mf">0.04</span><span class="p">)</span>
+
+<span class="c1">#result is dilated for marking the corners, not important</span>
+<span class="n">dst</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">dilate</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+<span class="c1"># Threshold for an optimal value, it may vary depending on the image.</span>
+<span class="n">img</span><span class="p">[</span><span class="n">dst</span> <span class="o">&gt;</span> <span class="mf">0.01</span><span class="o">*</span><span class="n">dst</span><span class="o">.</span><span class="n">max</span><span class="p">()]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+<span class="n">cv</span><span class="o">.</span><span class="n">namedWindow</span><span class="p">(</span><span class="s1">&#39;dst&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">cv</span><span class="o">.</span><span class="n">WINDOW_NORMAL</span><span class="p">)</span>
+<span class="n">cv</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="s1">&#39;dst&#39;</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
+<span class="n">cv</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="s1">&#39;output-files/corners-chessboard.png&#39;</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">cv</span><span class="o">.</span><span class="n">waitKey</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xff</span> <span class="o">==</span> <span class="mi">27</span><span class="p">:</span>
+    <span class="n">cv</span><span class="o">.</span><span class="n">destroyAllWindows</span><span class="p">()</span>
+</pre></div>
+<p>Below are the two results:</p>
+<p><img src="output-files/result-corners.png" alt="result-corners"></p>
+<h2 id="Corner-with-SubPixel-Accuracy">Corner with SubPixel Accuracy<a class="anchor-link" href="#Corner-with-SubPixel-Accuracy">&#182;</a></h2><p>Sometimes, you may need to find the corners with maximum accuracy. OpenCV comes with a function <a href="https://docs.opencv.org/3.4.1/dd/d1a/group__imgproc__feature.html#ga354e0d7c86d0d9da75de9b9701a9a87e">cv.cornerSubPix()</a> which further refines the corners detected with sub-pixel accuracy. Below is an example. As usual, we need to find the harris corners first. Then we pass the centroids of these corners (There may be a bunch of pixels at a corner, we take their centroid) to refine them. Harris corners are marked in red pixels and refined corners are marked in green pixels. For this function, we have to define the criteria when to stop the iteration. We stop it after a specified number of iteration or a certain accuracy is achieved, whichever occurs first. We also need to define the size of neighbourhood it would search for corners.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">cv2</span> <span class="kn">as</span> <span class="nn">cv</span>
+
+<span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;input-files/blox.jpg&#39;</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+<span class="n">gray</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">cv</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>
+
+<span class="c1"># find Harris corners</span>
+<span class="n">gray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">gray</span><span class="p">)</span>
+<span class="n">dst</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">cornerHarris</span><span class="p">(</span><span class="n">gray</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mf">0.04</span><span class="p">)</span>
+<span class="n">dst</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">dilate</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+<span class="n">ret</span><span class="p">,</span> <span class="n">dst</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">threshold</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="mf">0.01</span><span class="o">*</span><span class="n">dst</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">dst</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span>
+
+<span class="c1"># find centroids</span>
+<span class="n">ret</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">stats</span><span class="p">,</span> <span class="n">centroids</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">connectedComponentsWithStats</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span>
+
+<span class="c1"># define the criteria to stop and refine the corners</span>
+<span class="n">criteria</span> <span class="o">=</span> <span class="p">(</span><span class="n">cv</span><span class="o">.</span><span class="n">TERM_CRITERIA_EPS</span> <span class="o">+</span> <span class="n">cv</span><span class="o">.</span><span class="n">TERM_CRITERIA_MAX_ITER</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">)</span>
+<span class="n">corners</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">cornerSubPix</span><span class="p">(</span><span class="n">gray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">centroids</span><span class="p">),</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">criteria</span><span class="p">)</span>
+
+<span class="c1"># Now draw them</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">centroids</span><span class="p">,</span> <span class="n">corners</span><span class="p">))</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int0</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+<span class="n">img</span><span class="p">[</span><span class="n">res</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">res</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">]</span>
+<span class="n">img</span><span class="p">[</span><span class="n">res</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">res</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+<span class="n">cv</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="s1">&#39;output-files/subpixel.png&#39;</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
+</pre></div>
+<p>Below is the result:</p>
+<p><img src="output-files/subpixel.png" alt="subpixel"></p>
 
 </div>
 </div>

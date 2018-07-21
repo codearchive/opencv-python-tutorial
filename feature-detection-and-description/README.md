@@ -1,9 +1,11 @@
 # Feature Detection and Description
 
+----
+
 ## Contents
 
 - [Understanding Features](#Understanding-Features)  
-- Harris Corner Detection
+- [Harris Corner Detection](harris-corner-detection)
 - Shi-Tomasi Corner Detector & Good Features to Track
 - Introduction to SIFT (Scale-Invariant Feature Transform)
 - Introduction to SURF (Speeded-Up Robust Features)
