@@ -10,6 +10,8 @@
 - [Feature Detection and Description](feature-detection-and-description)
   - [Understanding Features](feature-detection-and-description/#Understanding-Features)  
   - [Harris Corner Detection](feature-detection-and-description/harris-corner-detection)
+  - [Shi-Tomasi Corner Detector & Good Features to Track](feature-detection-and-description/shi-tomasi-detector)
+  - [Introduction to SIFT (Scale-Invariant Feature Transform)](feature-detection-and-description/SIFT)
 
 ## Introduction to OpenCV
 

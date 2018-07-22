@@ -6,8 +6,8 @@
 
 - [Understanding Features](#Understanding-Features)  
 - [Harris Corner Detection](harris-corner-detection)
-- Shi-Tomasi Corner Detector & Good Features to Track
-- Introduction to SIFT (Scale-Invariant Feature Transform)
+- [Shi-Tomasi Corner Detector & Good Features to Track](shi-tomasi-detector)
+- [Introduction to SIFT (Scale-Invariant Feature Transform)](SIFT)
 - Introduction to SURF (Speeded-Up Robust Features)
 - FAST Algorithm for Corner Detection
 - BRIEF (Binary Robust Independent Elementary Features)

@@ -47,7 +47,7 @@ import numpy as np
 import cv2 as cv
 from matplotlib import pyplot as plt
 
-img = cv.imread('blox.jpg')
+img = cv.imread('input-files/blox.jpg')
 gray = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
 
 corners = cv.goodFeaturesToTrack(gray,25,0.01,10)
