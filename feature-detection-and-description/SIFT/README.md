@@ -27,7 +27,7 @@ In this chapter:
 
 In last couple of chapters, we saw some corner detectors like Harris etc. They are rotation-invariant, which means, even if the image is rotated, we can find the same corners. It is obvious because corners remain corners in rotated image also. But what about scaling? A corner may not be a corner if the image is scaled. For example, check a simple image below. A corner in a small image within a small window is flat when it is zoomed in the same window. So Harris corner is not scale invariant.
 
-![sift-scale-invariant](data/sift-scale-invariant.jpg)
+![sift-scale-invariant](/data/sift-scale-invariant.jpg)
 
 So, in 2004, **D.Lowe**, University of British Columbia, came up with a new algorithm, **Scale Invariant Feature Transform (SIFT)** in his paper, **Distinctive Image Features from Scale-Invariant Keypoints**, which extract keypoints and compute its descriptors. _\*\[This paper (you can read it [here](https://www.cs.ubc.ca/~lowe/papers/ijcv04.pdf)) is easy to understand and considered to be the best material available on SIFT. So this explanation is just a short summary of this paper\]\*_.
 
@@ -39,11 +39,11 @@ From the image above, it is obvious that we can't use the same window to detect 
 
 But this LoG is a little costly, so SIFT algorithm uses Difference of Gaussians (DoG) which is an approximation of LoG. Difference of Gaussian is obtained as the difference of Gaussian blurring of an image with two different $ \sigma $, let it be $ \sigma $ and $ k\sigma $. This process is done for different octaves of the image in Gaussian Pyramid. It is represented in below image:
 
-![sift-DoG](data/sift-dog.png)
+![sift-DoG](/data/sift-dog.png)
 
 Once this DoG are found, images are searched for local extrema over scale and space. For eg, one pixel in an image is compared with its 8 neighbours as well as 9 pixels in next scale and 9 pixels in previous scales. If it is a local extrema, it is a potential keypoint. It basically means that keypoint is best represented in that scale. It is shown in below image:
 
-![sift-local-extrema](data/sift-local-extrema.png)
+![sift-local-extrema](/data/sift-local-extrema.png)
 
 Regarding different parameters, the paper gives some empirical data which can be summarized as, number of octaves = 4, number of scale levels = 5, initial $ \sigma = 1.6 $, $ k = \sqrt 2 $ etc as optimal values.
 
