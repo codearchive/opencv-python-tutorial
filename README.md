@@ -5,6 +5,8 @@
 ## Contents
 
 - [Introduction to OpenCV](#Introduction-to-OpenCV)
+  - [Instruction to Install OpenCV-Python](#Instruction-to-Install-OpenCV-Python)
+  - [Additional Resources](#Additional-Resources)
 - [Image Processing in OpenCV](image-processing)
   - [Interactive Foreground Extraction using GrabCut Algorithm]()
 - [Feature Detection and Description](feature-detection-and-description)
