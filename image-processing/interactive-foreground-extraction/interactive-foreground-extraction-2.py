@@ -12,7 +12,7 @@ cv.grabCut(img_original, mask, rect, bgdModel, fgdModel, 1, cv.GC_INIT_WITH_RECT
 # newmask is the mask image I manually labelled
 newmask = cv.imread('input-files/newmask.jpg', 0)
 
-# wherever it is marked white (sure foreground), change mask=1
+# wherever it is marked white (sure foreground), change mask=data_n
 # wherever it is marked black (sure background), change mask=0
 mask[newmask == 0] = 0
 mask[newmask == 255] = 1
@@ -22,7 +22,7 @@ img = img_original*mask[:, :, np.newaxis]
 
 title = 'Foreground Extraction'
 plt.figure(title), plt.suptitle(title, fontsize=16)
-plt.subplot(221), plt.imshow(img_original), plt.title('Image 1 - Original Image')
+plt.subplot(221), plt.imshow(img_original), plt.title('Image data_n - Original Image')
 plt.subplot(222), plt.imshow(mask), plt.title('Image 2 - Mask')
 plt.subplot(223), plt.imshow(newmask), plt.title('Image 3 - Newmask')
 plt.subplot(224), plt.imshow(img), plt.title('Image 4 - Result')

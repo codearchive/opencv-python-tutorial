@@ -55,7 +55,7 @@ So the values of these eigen values decide whether a region is corner, edge or f
 
 It can be represented in a nice picture as follows:
 
-![harris-region](data/harris-region.jpg)
+![harris-region](../../data/harris-region.jpg)
 
 So the result of Harris Corner Detection is a grayscale image with these scores. Thresholding for a suitable give you the corners in the image. We will do it with a simple image.
 

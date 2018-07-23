@@ -15,7 +15,7 @@ How it works from user point of view? Initially user draws a rectangle around th
 
 See the image below. First player and football is enclosed in a blue rectangle. Then some final touch-ups with white strokes (denoting foreground) and black strokes (denoting background) is made. And we get a nice result.
 
-![grabcut-example](source/grabcut-example.jpg)
+![grabcut-example](../../data/grabcut-example.jpg)
 
 So what happens in background ?
 
@@ -37,7 +37,7 @@ So what happens in background ?
 
 It is [illustrated](http://www.cs.ru.ac.za/research/g02m1682/) in below image.
 
-![grabcut-scheme](source/grabcut-scheme.jpg)
+![grabcut-scheme](../../data/grabcut-scheme.jpg)
 
 ## Demo
 
@@ -75,4 +75,4 @@ What I actually did is that, I opened input image in paint application and added
 
 See the result below:
 
-![Result](source/result.png)
+![Result](../../data/grabcut-result.png)

@@ -30,7 +30,7 @@ $$ R = min(\lambda_1, \lambda_2) $$
 
 If it is a greater than a threshold value, it is considered as a corner. If we plot it in $ λ1−λ2 $ space as we did in Harris Corner Detector, we get an image as below:
 
-![shi-tomasi-space](data/shi-tomasi-space.png)
+![shi-tomasi-space](../../data/shi-tomasi-space.png)
 
 From the figure, you can see that only when $ λ1 $ and $ λ2 $ are above a minimum value, $ λmin $, it is conidered as a corner(green region).
 

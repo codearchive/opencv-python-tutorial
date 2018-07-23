@@ -8,7 +8,7 @@
 - [Harris Corner Detection](harris-corner-detection)
 - [Shi-Tomasi Corner Detector & Good Features to Track](shi-tomasi-detector)
 - [Introduction to SIFT (Scale-Invariant Feature Transform)](SIFT)
-- Introduction to SURF (Speeded-Up Robust Features)
+- [Introduction to SURF (Speeded-Up Robust Features)](SURF)
 - FAST Algorithm for Corner Detection
 - BRIEF (Binary Robust Independent Elementary Features)
 - ORB (Oriented FAST and Rotated BRIEF)
@@ -33,7 +33,7 @@ So our one basic question expands to more in number, but becomes more specific. 
 
 It is difficult to say how humans find these features. This is already programmed in our brain. But if we look deep into some pictures and search for different patterns, we will find something interesting. For example, take below image:
 
-![feature-building](data/feature-building.jpg)
+![feature-building](../data/feature-building.jpg)
 
 The image is very simple. At the top of image, six small image patches are given. Question for you is to find the exact location of these patches in the original image. How many correct results can you find?
 
@@ -43,7 +43,7 @@ C and D are much more simple. They are edges of the building. You can find an ap
 
 Finally, E and F are some corners of the building. And they can be easily found. Because at the corners, wherever you move this patch, it will look different. So they can be considered as good features. So now we move into simpler (and widely used image) for better understanding.
 
-![feature-simple](data/feature-simple.png)
+![feature-simple](../data/feature-simple.png)
 
 Just like above, the blue patch is flat area and difficult to find and track. Wherever you move the blue patch it looks the same. The black patch has an edge. If you move it in vertical direction (i.e. along the gradient) it changes. Moved along the edge (parallel to edge), it looks the same. And for red patch, it is a corner. Wherever you move the patch, it looks different, means it is unique. So basically, corners are considered to be good features in an image. (Not just corners, in some cases blobs are considered good features).
 
