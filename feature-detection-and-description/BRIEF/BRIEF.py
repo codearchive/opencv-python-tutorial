@@ -1,6 +1,6 @@
 import cv2 as cv
 
-img = cv.imread("../../data/blox.jpg", 0)
+img = cv.imread("../../data/ski-first-person-1.jpg", 0)
 # Initiate FAST detector
 star = cv.xfeatures2d.StarDetector_create()
 # Initiate BRIEF extractor
