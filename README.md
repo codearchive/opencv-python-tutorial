@@ -16,6 +16,7 @@
   - [Introduction to SIFT (Scale-Invariant Feature Transform)](feature-detection-and-description/SIFT)
   - [Introduction to SURF (Speeded-Up Robust Features)](feature-detection-and-description/SURF)
   - [FAST Algorithm for Corner Detection](feature-detection-and-description/FAST)
+  - [BRIEF (Binary Robust Independent Elementary Features)](feature-detection-and-description/BRIEF)
 
 ## Introduction to OpenCV
 

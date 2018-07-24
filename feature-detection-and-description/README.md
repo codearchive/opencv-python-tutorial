@@ -10,7 +10,7 @@
 - [Introduction to SIFT (Scale-Invariant Feature Transform)](SIFT)
 - [Introduction to SURF (Speeded-Up Robust Features)](SURF)
 - [FAST Algorithm for Corner Detection](FAST)
-- BRIEF (Binary Robust Independent Elementary Features)
+- [BRIEF (Binary Robust Independent Elementary Features)](BRIEF)
 - ORB (Oriented FAST and Rotated BRIEF)
 - Feature Matching
 - Feature Matching + Homography to find Objects

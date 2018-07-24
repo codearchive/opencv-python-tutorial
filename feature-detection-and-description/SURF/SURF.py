@@ -22,7 +22,7 @@ img2 = cv.drawKeypoints(img, kp, None, (0, 0, 255), 4)
 # cv.imwrite("output-files/surf-result-0.png", img2)
 cv.imshow("Result", img2)
 k = cv.waitKey(0)
-while True:
+while(1):
     if k == 27:
         cv.destroyAllWindows()
         break
