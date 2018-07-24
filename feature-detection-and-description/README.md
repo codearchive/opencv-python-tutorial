@@ -9,7 +9,7 @@
 - [Shi-Tomasi Corner Detector & Good Features to Track](shi-tomasi-detector)
 - [Introduction to SIFT (Scale-Invariant Feature Transform)](SIFT)
 - [Introduction to SURF (Speeded-Up Robust Features)](SURF)
-- FAST Algorithm for Corner Detection
+- [FAST Algorithm for Corner Detection](FAST)
 - BRIEF (Binary Robust Independent Elementary Features)
 - ORB (Oriented FAST and Rotated BRIEF)
 - Feature Matching
