@@ -11775,92 +11775,113 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Introduction-to-SURF-(Speeded-Up-Robust-Features)">Introduction to SURF (Speeded-Up Robust Features)<a class="anchor-link" href="#Introduction-to-SURF-(Speeded-Up-Robust-Features)">&#182;</a></h1><p><em>You can view <a href="README.ipynb">IPython Notebook</a> report</em></p>
+<h1 id="FAST-Algorithm-for-Corner-Detection">FAST Algorithm for Corner Detection<a class="anchor-link" href="#FAST-Algorithm-for-Corner-Detection">&#182;</a></h1><p><em>You can view <a href="README.ipynb">IPython Notebook</a> report.</em></p>
 <hr>
 <h2 id="Contents">Contents<a class="anchor-link" href="#Contents">&#182;</a></h2><ul>
-<li><a href="#Goal">Goal</a></li>
-<li><a href="#Theory">Theory</a></li>
-<li><a href="#SURF-in-OpenCV">SURF in OpenCV</a></li>
+<li><a href="#GOAL">GOAL</a></li>
+<li><a href="#Theory">Theory</a><ul>
+<li><a href="#Feature-Detection-using-FAST">Feature Detection using FAST</a></li>
+<li><a href="#Machine-Learning-a-Corner-Detector">Machine Learning a Corner Detector</a></li>
+<li><a href="#Non-maximal-Suppression">Non-maximal Suppression</a></li>
+<li><a href="#Summary">Summary</a></li>
 </ul>
-<h2 id="Goal">Goal<a class="anchor-link" href="#Goal">&#182;</a></h2><p>In this chapter:</p>
+</li>
+<li><a href="#FAST-Feature-Detector-in-OpenCV">FAST Feature Detector in OpenCV </a></li>
+<li><a href="#Additional-Resources">Additional Resources</a></li>
+</ul>
+<h2 id="GOAL">GOAL<a class="anchor-link" href="#GOAL">&#182;</a></h2><p>In this chapter:</p>
 <ul>
-<li>We will see the basics of SURF.</li>
-<li>We will see SURF functionalities in OpenCV.</li>
+<li>We will understand the basics of FAST algorithm.</li>
+<li>We will find corners using OpenCV functionalities for FAST algorithm.</li>
 </ul>
-<h2 id="Theory">Theory<a class="anchor-link" href="#Theory">&#182;</a></h2><p>In last chapter, we saw SIFT for keypoint detection and description. But it was comparatively slow and people needed more speeded-up version. In 2006, three people, <strong>Bay, H., Tuytelaars, T. and Van Gool, L.</strong>, published another paper, <strong><a href="http://www.vision.ee.ethz.ch/~surf/eccv06.pdf">"SURF: Speeded Up Robust Features"</a></strong> which introduced a new algorithm called SURF. As name suggests, it is a speeded-up version of SIFT.</p>
-<p>In SIFT, Lowe approximated Laplacian of Gaussian with Difference of Gaussian for finding scale-space. SURF goes a little further and approximates LoG with Box Filter. Below image shows a demonstration of such an approximation. One big advantage of this approximation is that, convolution with box filter can be easily calculated with the help of integral images. And it can be done in parallel for different scales. Also the SURF rely on determinant of Hessian matrix for both scale and location.</p>
-<p><img src="../../data/surf-boxfilter.jpg" alt="surf-boxfilter"></p>
-<p>For orientation assignment, SURF uses wavelet responses in horizontal and vertical direction for a neighbourhood of size 6s. Adequate gaussian weights are also applied to it. Then they are plotted in a space as given in below image. The dominant orientation is estimated by calculating the sum of all responses within a sliding orientation window of angle 60 degrees. Interesting thing is that, wavelet response can be found out using integral images very easily at any scale. For many applications, rotation invariance is not required, so no need of finding this orientation, which speeds up the process. SURF provides such a functionality called Upright-SURF or U-SURF. It improves speed and is robust upto ±15∘. OpenCV supports both, depending upon the flag, upright. If it is 0, orientation is calculated. If it is 1, orientation is not calculated and it is faster.</p>
-<p><img src="../../data/surf-orientation.jpg" alt="surf-orientation"></p>
-<p>For feature description, SURF uses Wavelet responses in horizontal and vertical direction (again, use of integral images makes things easier). A neighbourhood of size 20sX20s is taken around the keypoint where s is the size. It is divided into 4x4 subregions. For each subregion, horizontal and vertical wavelet responses are taken and a vector is formed like this, $ v=( \sum{d_x}, \sum{d_y}, \sum{|d_x|}, \sum{|d_y|}) $. This when represented as a vector gives SURF feature descriptor with total 64 dimensions. Lower the dimension, higher the speed of computation and matching, but provide better distinctiveness of features.</p>
-<p>For more distinctiveness, SURF feature descriptor has an extended 128 dimension version. The sums of $ d_x $ and $ |d_x| $ are computed separately for $ d_y &lt; 0 $ and $ d_y \geq 0 $. Similarly, the sums of $ d_y $ and $ |d_y| $ are split up according to the sign of $ d_x $, thereby doubling the number of features. It doesn't add much computation complexity. OpenCV supports both by setting the value of flag extended with 0 and 1 for 64-dim and 128-dim respectively (default is 128-dim).</p>
-<p>Another important improvement is the use of sign of Laplacian (trace of Hessian Matrix) for underlying interest point. It adds no computation cost since it is already computed during detection. The sign of the Laplacian distinguishes bright blobs on dark backgrounds from the reverse situation. In the matching stage, we only compare features if they have the same type of contrast (as shown in image below). This minimal information allows for faster matching, without reducing the descriptor's performance.</p>
-<p><img src="../../data/surf-matching.jpg" alt="surf-matching"></p>
-<p>In short, SURF adds a lot of features to improve the speed in every step. Analysis shows it is 3 times faster than SIFT while performance is comparable to SIFT. SURF is good at handling images with blurring and rotation, but not good at handling viewpoint change and illumination change.</p>
-<h2 id="SURF-in-OpenCV">SURF in OpenCV<a class="anchor-link" href="#SURF-in-OpenCV">&#182;</a></h2><p>OpenCV provides SURF functionalities just like SIFT. You initiate a SURF object with some optional conditions like 64/128-dim descriptors, Upright/Normal SURF etc. All the details are well explained in docs. Then as we did in SIFT, we can use SURF.detect(), SURF.compute() etc for finding keypoints and descriptors.</p>
-<p>First we will see a simple demo on how to find SURF keypoints and descriptors and draw it. All examples are shown in Python terminal since it is just same as SIFT only.</p>
-<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cv2</span> <span class="kn">as</span> <span class="nn">cv</span>
+<h2 id="Theory">Theory<a class="anchor-link" href="#Theory">&#182;</a></h2><p>We saw several feature detectors and many of them are really good. But when looking from a real-time application point of view, they are not fast enough. One best example would be SLAM (Simultaneous Localization and Mapping) mobile robot which have limited computational resources.</p>
+<p>As a solution to this, <strong>FAST (Features from Accelerated Segment Test)</strong> algorithm was proposed by <strong>Edward Rosten</strong> and <strong>Tom Drummond</strong> in their paper <strong><a href="https://www.edwardrosten.com/work/rosten_2006_machine.pdf">"Machine learning for high-speed corner detection"</a></strong> in 2006 (Later revised it in 2010). A basic summary of the algorithm is presented below. Refer original paper for more details (All the images are taken from original paper).</p>
+<h3 id="Feature-Detection-using-FAST">Feature Detection using FAST<a class="anchor-link" href="#Feature-Detection-using-FAST">&#182;</a></h3><ol>
+<li>Select a pixel $ p $ in the image which is to be identified as an interest point or not. Let its intensity be $ I_p $.</li>
+<li>Select appropriate threshold value $ t $.</li>
+<li>Consider a circle of 16 pixels around the pixel under test. (See the image below)</li>
+</ol>
+<p><img src="../../data/fast-speedtest.jpg" alt="fast-speedtest"></p>
+<ol>
+<li>Now the pixel $ p $ is a corner if there exists a set of $ n $ contiguous pixels in the circle (of 16 pixels) which are all brighter than $ I_p+t $, or all darker than $ I_p−t $. (Shown as white dash lines in the above image). $ n $ was chosen to be 12.</li>
+<li>A <strong>high-speed test</strong> was proposed to exclude a large number of non-corners. This test examines only the four pixels at 1, 9, 5 and 13 (First 1 and 9 are tested if they are too brighter or darker. If so, then checks 5 and 13). If $ p $ is a corner, then at least three of these must all be brighter than $ I_p+t $ or darker than $ I_p−t $. If neither of these is the case, then $ p $ cannot be a corner. The full segment test criterion can then be applied to the passed candidates by examining all pixels in the circle. This detector in itself exhibits high performance, but there are several weaknesses:<ul>
+<li>It does not reject as many candidates for $ n &lt; 12 $.</li>
+<li>The choice of pixels is not optimal because its efficiency depends on ordering of the questions and distribution of corner appearances.</li>
+<li>Results of high-speed tests are thrown away.</li>
+<li>Multiple features are detected adjacent to one another.</li>
+</ul>
+</li>
+</ol>
+<p>First 3 points are addressed with a machine learning approach. Last one is addressed using non-maximal suppression.</p>
+<h3 id="Machine-Learning-a-Corner-Detector">Machine Learning a Corner Detector<a class="anchor-link" href="#Machine-Learning-a-Corner-Detector">&#182;</a></h3><ol>
+<li>Select a set of images for training (preferably from the target application domain).</li>
+<li>Run FAST algorithm in every images to find feature points.</li>
+<li>For every feature point, store the 16 pixels around it as a vector. Do it for all the images to get feature vector $ P $.</li>
+<li>Each pixel (say $ x $) in these 16 pixels can have one of the following three states:</li>
+</ol>
+<p>$$ S_{p \rightarrow x} = \left\{\begin{matrix}
+d, &amp;         &amp;       &amp; I_{p\rightarrow x} &amp; \leq &amp; I_p - t &amp; (darker) \\ 
+s, &amp; I_p - t &amp; &lt;     &amp; I_{p\rightarrow x} &amp; &lt;    &amp; I_p + t &amp; (similar)\\ 
+b, &amp; I_p + t &amp; \leq  &amp; I_{p\rightarrow x} &amp;      &amp;         &amp; (brighter)
+\end{matrix}\right. $$</p>
+<ol>
+<li>Depending on these states, the feature vector $ P $ is subdivided into 3 subsets, $ P_d $, $ P_s $, $ P_b $.</li>
+<li>Define a new boolean variable, $ K_p $, which is true if $ p $ is a corner and false otherwise.</li>
+<li>Use the ID3 algorithm (decision tree classifier) to query each subset using the variable $ K_p $ for the knowledge about the true class. It selects the $ x $ which yields the most information about whether the candidate pixel is a corner, measured by the entropy of $ K_p $.</li>
+<li>This is recursively applied to all the subsets until its entropy is zero.</li>
+<li>The decision tree so created is used for fast detection in other image.</li>
+</ol>
+<h3 id="Non-maximal-Suppression">Non-maximal Suppression<a class="anchor-link" href="#Non-maximal-Suppression">&#182;</a></h3><p>Detecting multiple interest points in adjacent locations is another problem. It is solved by using Non-maximum Suppression.</p>
+<ol>
+<li>Compute a score function, $ V $ for all the detected feature points. $ V $ is the sum of absolute difference between $ p $ and 16 surrounding pixels values.</li>
+<li>Consider two adjacent keypoints and compute their $ V $ values.</li>
+<li>Discard the one with lower $ V $ value.</li>
+</ol>
+<h3 id="Summary">Summary<a class="anchor-link" href="#Summary">&#182;</a></h3><p>It is several times faster than other existing corner detectors. But it is not robust to high levels of noise. It is dependent on a threshold.</p>
+<h2 id="FAST-Feature-Detector-in-OpenCV">FAST Feature Detector in OpenCV<a class="anchor-link" href="#FAST-Feature-Detector-in-OpenCV">&#182;</a></h2><p>It is called as any other feature detector in OpenCV. If you want, you can specify the threshold, whether non-maximum suppression to be applied or not, the neighborhood to be used etc.</p>
+<p>For the neighborhood, three flags are defined, <strong>cv.FAST_FEATURE_DETECTOR_TYPE_5_8</strong>, <strong>cv.FAST_FEATURE_DETECTOR_TYPE_7_12</strong> and <strong>cv.FAST_FEATURE_DETECTOR_TYPE_9_16</strong>. Below is a simple code on how to detect and draw the FAST feature points.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">cv2</span> <span class="kn">as</span> <span class="nn">cv</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
 
-<span class="n">img</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="s2">&quot;../../data/butterfly.jpg&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="s2">&quot;../../data/blox.jpg&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-<span class="c1"># Create SURF object. You can specify params here or later.</span>
-<span class="c1"># Here I set Hessian Threshold to 400</span>
-<span class="n">surf</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">xfeatures2d</span><span class="o">.</span><span class="n">SURF_create</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
+<span class="c1"># Initiate FAST object with default values</span>
+<span class="n">fast</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">FastFeatureDetector_create</span><span class="p">()</span>
 
-<span class="c1"># Find keypoints and descriptors directly</span>
-<span class="n">kp</span><span class="p">,</span> <span class="n">des</span> <span class="o">=</span> <span class="n">surf</span><span class="o">.</span><span class="n">detectAndCompute</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">kp</span><span class="p">))</span> <span class="c1"># kp = 1330</span>
-</pre></div>
-<p>1330 keypoints is too much to show in a picture. We reduce it to some 50 to draw it on an image. While matching, we may need all those features, but not now. So we increase the Hessian Threshold.</p>
-<div class="highlight"><pre><span></span><span class="c1"># We set it to some 50000. Remember, it is just for representing in picture.</span>
-<span class="c1"># In actual cases, it is better to have a value 300-500</span>
-<span class="n">surf</span><span class="o">.</span><span class="n">setHessianThreshold</span><span class="p">(</span><span class="mi">50000</span><span class="p">)</span>
+<span class="c1"># find and draw the keypoints</span>
+<span class="n">kp</span> <span class="o">=</span> <span class="n">fast</span><span class="o">.</span><span class="n">detect</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+<span class="n">img2</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">drawKeypoints</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">kp</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
-<span class="c1"># Again compute keypoints and check its number</span>
-<span class="n">kp</span><span class="p">,</span> <span class="n">des</span> <span class="o">=</span> <span class="n">surf</span><span class="o">.</span><span class="n">detectAndCompute</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">kp</span><span class="p">))</span> <span class="c1"># kp = 48</span>
-</pre></div>
-<p>It is less than 50. Let's draw it on the image.</p>
-<div class="highlight"><pre><span></span><span class="n">img2</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">drawKeypoints</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">kp</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
+<span class="c1"># Print all default params</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Threshold: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fast</span><span class="o">.</span><span class="n">getThreshold</span><span class="p">()),</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+      <span class="s2">&quot;nonmaxSuppression: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fast</span><span class="o">.</span><span class="n">getNonmaxSuppression</span><span class="p">()),</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+      <span class="s2">&quot;neighborhood: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fast</span><span class="o">.</span><span class="n">getType</span><span class="p">()),</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+      <span class="s2">&quot;Total Keypoints with nonmaxSuppression: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">kp</span><span class="p">)))</span>
 
-<span class="n">cv</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="s2">&quot;Result&quot;</span><span class="p">,</span> <span class="n">img2</span><span class="p">)</span>
-<span class="n">cv</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="s2">&quot;surf-result.png&quot;</span><span class="p">,</span> <span class="n">img2</span><span class="p">)</span>
+<span class="n">cv</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="s2">&quot;output-files/fast_true.png&quot;</span><span class="p">,</span> <span class="n">img2</span><span class="p">)</span>
+<span class="n">cv</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="s2">&quot;With Suppression&quot;</span><span class="p">,</span> <span class="n">img2</span><span class="p">)</span>
+
+<span class="c1"># Disable nonmaxSuppression</span>
+<span class="n">fast</span><span class="o">.</span><span class="n">setNonmaxSuppression</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">kp</span> <span class="o">=</span> <span class="n">fast</span><span class="o">.</span><span class="n">detect</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Total Keypoints without nonmaxSuppression: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">kp</span><span class="p">)))</span>
+
+<span class="n">img3</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">drawKeypoints</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">kp</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="n">cv</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="s2">&quot;output-files/fast_false.png&quot;</span><span class="p">,</span> <span class="n">img3</span><span class="p">)</span>
+<span class="n">cv</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="s2">&quot;Without Suppression&quot;</span><span class="p">,</span> <span class="n">img3</span><span class="p">)</span>
 <span class="n">k</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">waitKey</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">27</span><span class="p">:</span>
-    <span class="n">cv</span><span class="o">.</span><span class="n">destroyAllWindows</span><span class="p">()</span>
+<span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">27</span><span class="p">:</span>
+        <span class="n">cv</span><span class="o">.</span><span class="n">destroyAllWindows</span><span class="p">()</span>
+        <span class="k">break</span>
 </pre></div>
-<p>See the result below. You can see that SURF is more like a blob detector. It detects the white blobs on wings of butterfly.</p>
-<p><img src="output-files/surf-result-0.png" alt="surf-result-0"></p>
-<p>You can test it with other images.</p>
-<p><img src="../../data/surf-group-1.png" alt="surf-group-1"></p>
-<p><img src="../../data/surf-group-2.png" alt="surf-group-2"></p>
-<p>Now I want to apply U-SURF, so that it won't find the orientation.</p>
-<div class="highlight"><pre><span></span><span class="c1"># Check upright flag, if it False, set it to True</span>
-<span class="k">if</span> <span class="n">surf</span><span class="o">.</span><span class="n">getUpright</span><span class="p">()</span> <span class="o">==</span> <span class="bp">False</span><span class="p">:</span>
-    <span class="n">surf</span><span class="o">.</span><span class="n">setUpright</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-
-<span class="c1"># Recompute the feature points and draw it</span>
-<span class="n">kp</span> <span class="o">=</span> <span class="n">surf</span><span class="o">.</span><span class="n">detect</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-<span class="n">img2</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">drawKeypoints</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">kp</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
-
-<span class="n">cv</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="s2">&quot;Result&quot;</span><span class="p">,</span> <span class="n">img2</span><span class="p">)</span>
-</pre></div>
-<p>See the results below. All the orientations are shown in same direction. It is faster than previous. If you are working on cases where orientation is not a problem (like panorama stitching) etc, this is better.</p>
-<p><img src="output-files/surf-result-6.png" alt="surf-result-0"></p>
-<p>Finally we check the descriptor size and change it to 128 if it is only 64-dim.</p>
-<div class="highlight"><pre><span></span><span class="c1"># Find size of descriptor</span>
-<span class="k">print</span><span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">descriptorSize</span><span class="p">())</span>  <span class="c1"># 64</span>
-
-<span class="c1"># That means flag, &quot;extended&quot; is False.</span>
-<span class="k">print</span><span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">getExtended</span><span class="p">())</span>  <span class="c1"># False</span>
-
-<span class="c1"># So we make it to True to get 128-dim descriptors.</span>
-<span class="n">surf</span><span class="o">.</span><span class="n">setExtended</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">kp</span><span class="p">,</span> <span class="n">des</span> <span class="o">=</span> <span class="n">surf</span><span class="o">.</span><span class="n">detectAndCompute</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">descriptorSize</span><span class="p">())</span>  <span class="c1"># 128</span>
-<span class="k">print</span><span class="p">(</span><span class="n">des</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  <span class="c1"># (48, 128)</span>
-</pre></div>
-<p>Remaining part is matching which we will do in another chapter.</p>
+<p>See the results. First image shows FAST with nonmaxSuppression and second one without nonmaxSuppression:</p>
+<p><img src="../../data/FAST-result.png" alt="FAST-result"></p>
+<h2 id="Additional-Resources">Additional Resources<a class="anchor-link" href="#Additional-Resources">&#182;</a></h2><ol>
+<li>Edward Rosten and Tom Drummond, “Machine learning for high speed corner detection” in 9th European Conference on Computer Vision, vol. 1, 2006, pp. 430–443.</li>
+<li>Edward Rosten, Reid Porter, and Tom Drummond, "Faster and better: a machine learning approach to corner detection" in IEEE Trans. Pattern Analysis and Machine Intelligence, 2010, vol 32, pp. 105-119.</li>
+</ol>
 
 </div>
 </div>

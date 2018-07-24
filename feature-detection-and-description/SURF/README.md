@@ -1,6 +1,8 @@
 
 # Introduction to SURF (Speeded-Up Robust Features)
 
+_You can view [IPython Notebook](README.ipynb) report_
+
 ----
 
 ## Contents
@@ -65,7 +67,7 @@ print(len(kp)) # kp = 1330
 # In actual cases, it is better to have a value 300-500
 surf.setHessianThreshold(50000)
 
-# Again compute keypoints and check its number.
+# Again compute keypoints and check its number
 kp, des = surf.detectAndCompute(img, None)
 print(len(kp)) # kp = 48
 ```
