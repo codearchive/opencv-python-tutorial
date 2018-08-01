@@ -18,6 +18,8 @@
   - [FAST Algorithm for Corner Detection](feature-detection-and-description/FAST)
   - [BRIEF (Binary Robust Independent Elementary Features)](feature-detection-and-description/BRIEF)
   - [ORB (Oriented FAST and Rotated BRIEF)](feature-detection-and-description/ORB)
+  - [Feature Matching](feature-detection-and-description/feature-matching)
+  - [Feature Matching + Homography to find Objects](feature-detection-and-description/homography)
 
 ## Introduction to OpenCV
 

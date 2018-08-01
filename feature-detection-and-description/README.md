@@ -12,8 +12,8 @@
 - [FAST Algorithm for Corner Detection](FAST)
 - [BRIEF (Binary Robust Independent Elementary Features)](BRIEF)
 - [ORB (Oriented FAST and Rotated BRIEF)](ORB)
-- Feature Matching
-- Feature Matching + Homography to find Objects
+- [Feature Matching](feature-matching)
+- [Feature Matching + Homography to find Objects](homography)
 
 ## Understanding Features 
 
