@@ -41,9 +41,9 @@ else:
                                                         MIN_MATCH_COUNT))
     matchesMask = None
 
-draw_params = dict(matchColor=(0, 255, 0), # draw matches in green color
+draw_params = dict(matchColor=(0, 255, 0),  # draw matches in green color
                    singlePointColor=None,
-                   matchesMask=matchesMask, # draw only inliers
+                   matchesMask=matchesMask,  # draw only inliers
                    flags=2)
 img3 = cv.drawMatches(img1, kp1, img2, kp2, good, None, **draw_params)
 cv.imwrite("output-files/homography-res.png", img3)

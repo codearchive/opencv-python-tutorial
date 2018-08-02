@@ -37,7 +37,7 @@ import cv2 as cv
 
 MIN_MATCH_COUNT = 10
 
-img1 = cv.imread("../../data/blox.jpg", 0)  # queryImage
+img1 = cv.imread("../../data/box.png", 0)  # queryImage
 img2 = cv.imread("../../data/box_in_scene.png", 0)  # trainImage
 
 # Initiate SIFT detector

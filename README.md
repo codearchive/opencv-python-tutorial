@@ -20,6 +20,8 @@
   - [ORB (Oriented FAST and Rotated BRIEF)](feature-detection-and-description/ORB)
   - [Feature Matching](feature-detection-and-description/feature-matching)
   - [Feature Matching + Homography to find Objects](feature-detection-and-description/homography)
+- [Video Analysis](video-analysis)
+  - [Meanshift and Camshift](video-analysis/meanshift-camshift)
 
 ## Introduction to OpenCV
 
