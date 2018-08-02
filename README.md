@@ -22,6 +22,7 @@
   - [Feature Matching + Homography to find Objects](feature-detection-and-description/homography)
 - [Video Analysis](video-analysis)
   - [Meanshift and Camshift](video-analysis/meanshift-camshift)
+  - [Optical Flow](video-analysis/optical-flow)
 
 ## Introduction to OpenCV
 

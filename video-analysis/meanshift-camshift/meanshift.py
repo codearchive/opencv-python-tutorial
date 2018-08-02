@@ -22,8 +22,10 @@ term_crit = (cv.TERM_CRITERIA_EPS | cv.TERM_CRITERIA_COUNT, 10, 1)
 
 # Define the codec and create VideoWriter object
 fourcc = cv.VideoWriter_fourcc(*'XVID')
+width = int(cap.get(cv.CAP_PROP_FRAME_WIDTH))
+height = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
 outVideo = cv.VideoWriter("output-files/meanshift-res.avi", \
-                          fourcc, 25.0, (640, 360))
+                          fourcc, 25.0, (width, height))
 
 # saved frame number
 frame_number = 0

@@ -11775,58 +11775,82 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Meanshift-and-Camshift">Meanshift and Camshift<a class="anchor-link" href="#Meanshift-and-Camshift">&#182;</a></h1><p><em>You can view <a href="README.ipynb">IPython Nootebook</a> report.</em></p>
+<h1 id="Optical-Flow">Optical Flow<a class="anchor-link" href="#Optical-Flow">&#182;</a></h1><p><em>You can view <a href="README.ipynb">IPython Nootebook</a> report.</em></p>
 <hr>
 <h2 id="Contents">Contents<a class="anchor-link" href="#Contents">&#182;</a></h2><ul>
 <li><a href="#GOAL">GOAL</a></li>
-<li><a href="#Meanshift">Meanshift</a><ul>
-<li><a href="#Meanshift-in-OpenCV">Meanshift in OpenCV</a></li>
+<li><a href="#Optical-Flow">Optical Flow</a><ul>
+<li><a href="#Lucas-Kanade-method">Lucas-Kanade method</a></li>
 </ul>
 </li>
-<li><a href="#Camshift">Camshift</a><ul>
-<li><a href="#Camshift-in-OpenCV">Camshift in OpenCV</a></li>
-</ul>
-</li>
-<li><a href="#Additional-Resources">Additional Resources</a></li>
+<li><a href="#Lucas-Kanade-Optical-Flow-in-OpenCV">Lucas-Kanade Optical Flow in OpenCV</a></li>
+<li><a href="#Dense-Optical-Flow-in-OpenCV">Dense Optical Flow in OpenCV</a></li>
 <li><a href="#Exercises">Exercises</a></li>
 </ul>
 <h2 id="GOAL">GOAL<a class="anchor-link" href="#GOAL">&#182;</a></h2><p>In this chapter:</p>
 <ul>
-<li>We will learn about Meanshift and Camshift algorithms to find and track objects in videos.</li>
+<li>We will understand the concepts of optical flow and its estimation using Lucas-Kanade method.</li>
+<li>We will use functions like <a href="https://docs.opencv.org/3.4.1/dc/d6b/group__video__track.html#ga473e4b886d0bcc6b65831eb88ed93323">cv.calcOpticalFlowPyrLK()</a> to track feature points in a video.</li>
 </ul>
-<h2 id="Meanshift">Meanshift<a class="anchor-link" href="#Meanshift">&#182;</a></h2><p>The intuition behind the meanshift is simple. Consider you have a set of points. (It can be a pixel distribution like histogram backprojection). You are given a small window ( may be a circle) and you have to move that window to the area of maximum pixel density (or maximum number of points). It is illustrated in the simple image given below:</p>
-<p><img src="../../data/meanshift-basics.jpg" alt="meanshift-basics"></p>
-<p>The initial window is shown in blue circle with the name "C1". Its original center is marked in blue rectangle, named "C1_o". But if you find the centroid of the points inside that window, you will get the point "C1_r" (marked in small blue circle) which is the real centroid of window. Surely they don't match. So move your window such that circle of the new window matches with previous centroid. Again find the new centroid. Most probably, it won't match. So move it again, and continue the iterations such that center of window and its centroid falls on the same location (or with a small desired error). So finally what you obtain is a window with maximum pixel distribution. It is marked with green circle, named "C2". As you can see in image, it has maximum number of points. The whole process is demonstrated on a static image below:</p>
-<p><img src="../../data/meanshift-face.gif" alt="meanshift-face"></p>
-<p>So we normally pass the histogram backprojected image and initial target location. When the object moves, obviously the movement is reflected in histogram backprojected image. As a result, meanshift algorithm moves our window to the new location with maximum density.</p>
-<h3 id="Meanshift-in-OpenCV">Meanshift in OpenCV<a class="anchor-link" href="#Meanshift-in-OpenCV">&#182;</a></h3><p>To use meanshift in OpenCV, first we need to setup the target, find its histogram so that we can backproject the target on each frame for calculation of meanshift. We also need to provide initial location of window. For histogram, only Hue is considered here. Also, to avoid false values due to low light, low light values are discarded using <a href="https://docs.opencv.org/3.4.1/d2/de8/group__core__array.html#ga48af0ab51e36436c5d04340e036ce981">cv.inRange()</a> function.</p>
+<h2 id="Optical-Flow">Optical Flow<a class="anchor-link" href="#Optical-Flow">&#182;</a></h2><p>Optical flow is the pattern of apparent motion of image objects between two consecutive frames caused by the movemement of object or camera. It is 2D vector field where each vector is a displacement vector showing the movement of points from first frame to second. Consider the image below (Image Courtesy: <a href="https://en.wikipedia.org/wiki/Optical_flow">Wikipedia article on Optical Flow</a>).</p>
+<p><img src="../../data/optical-flow-basic1.jpg" alt="optical-flow-basic1"></p>
+<p>It shows a ball moving in 5 consecutive frames. The arrow shows its displacement vector. Optical flow has many applications in areas like:</p>
+<ul>
+<li>Structure from Motion;</li>
+<li>Video Compression;</li>
+<li>Video Stabilization etc.</li>
+</ul>
+<p>Optical flow works on several assumptions:</p>
+<ul>
+<li>The pixel intensities of an object do not change between consecutive frames.</li>
+<li>Neighbouring pixels have similar motion.</li>
+</ul>
+<p>Consider a pixel $ I(x,y,t) $ in first frame (Check a new dimension, time, is added here. Earlier we were working with images only, so no need of time). It moves by distance $ (dx,dy) $ in next frame taken after $ dt $ time. So since those pixels are the same and intensity does not change, we can say,</p>
+<p>$$ I(x,y,t) = I(x+dx, y+dy, t+dt) $$</p>
+<p>Then take taylor series approximation of right-hand side, remove common terms and divide by dt to get the following equation:</p>
+<p>$$ f_x u + f_y v + f_t = 0 $$</p>
+<p>where:</p>
+<p>$$ f_x = \frac{\partial f}{\partial x} \; ; \; f_y = \frac{\partial f}{\partial y} $$</p>
+<p>$$ u = \frac{dx}{dt} \; ; \; v = \frac{dy}{dt} $$</p>
+<p>Above equation is called Optical Flow equation. In it, we can find $ f_x $ and $ f_y $, they are image gradients. Similarly $ f_t $ is the gradient along time. But $ (u,v) $ is unknown. We cannot solve this one equation with two unknown variables. So several methods are provided to solve this problem and one of them is Lucas-Kanade.</p>
+<h3 id="Lucas-Kanade-method">Lucas-Kanade method<a class="anchor-link" href="#Lucas-Kanade-method">&#182;</a></h3><p>We have seen an assumption before, that all the neighbouring pixels will have similar motion. Lucas-Kanade method takes a 3x3 patch around the point. So all the 9 points have the same motion. We can find $ (f_x,f_y,f_t) $ for these 9 points. So now our problem becomes solving 9 equations with two unknown variables which is over-determined. A better solution is obtained with least square fit method. Below is the final solution which is two equation-two unknown problem and solve to get the solution.</p>
+<p>$$ \begin{bmatrix} u \\ v \end{bmatrix} = \begin{bmatrix} \sum_{i}{f_{x_i}}^2 &amp; \sum_{i}{f_{x_i} f_{y_i} } \\ \sum_{i}{f_{x_i} f_{y_i}} &amp; \sum_{i}{f_{y_i}}^2 \end{bmatrix}^{-1} \begin{bmatrix} - \sum_{i}{f_{x_i} f_{t_i}} \\ - \sum_{i}{f_{y_i} f_{t_i}} \end{bmatrix} $$</p>
+<p>(Check similarity of inverse matrix with Harris corner detector. It denotes that corners are better points to be tracked.)</p>
+<p>So from user point of view, idea is simple, we give some points to track, we receive the optical flow vectors of those points. But again there are some problems. Until now, we were dealing with small motions. So it fails when there is large motion. So again we go for pyramids. When we go up in the pyramid, small motions are removed and large motions becomes small motions. So applying Lucas-Kanade there, we get optical flow along with the scale.</p>
+<h2 id="Lucas-Kanade-Optical-Flow-in-OpenCV">Lucas-Kanade Optical Flow in OpenCV<a class="anchor-link" href="#Lucas-Kanade-Optical-Flow-in-OpenCV">&#182;</a></h2><p>OpenCV provides all these in a single function, <a href="https://docs.opencv.org/3.4.1/dc/d6b/group__video__track.html#ga473e4b886d0bcc6b65831eb88ed93323">cv.calcOpticalFlowPyrLK()</a>. Here, we create a simple application which tracks some points in a video. To decide the points, we use <a href="https://docs.opencv.org/3.4.1/dd/d1a/group__imgproc__feature.html#ga1d6bb77486c8f92d79c8793ad995d541">cv.goodFeaturesToTrack()</a>. We take the first frame, detect some Shi-Tomasi corner points in it, then we iteratively track those points using Lucas-Kanade optical flow. For the function <a href="https://docs.opencv.org/3.4.1/dc/d6b/group__video__track.html#ga473e4b886d0bcc6b65831eb88ed93323">cv.calcOpticalFlowPyrLK()</a> we pass the previous frame, previous points and next frame. It returns next points along with some status numbers which has a value of 1 if next point is found, else zero. We iteratively pass these next points as previous points in next step. See the code below:</p>
 <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">cv2</span> <span class="kn">as</span> <span class="nn">cv</span>
 
 <span class="n">cap</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">VideoCapture</span><span class="p">(</span><span class="s2">&quot;../../data/slow.mp4&quot;</span><span class="p">)</span>
-<span class="c1"># take first frame of the video</span>
-<span class="n">ret</span><span class="p">,</span> <span class="n">frame</span> <span class="o">=</span> <span class="n">cap</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 
-<span class="c1"># setup initial location of window</span>
-<span class="n">r</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="mi">190</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">330</span><span class="p">,</span> <span class="mi">60</span>  <span class="c1"># simply hardcoded the values</span>
-<span class="n">track_window</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+<span class="c1"># params for Shi-Tomasi corner detection</span>
+<span class="n">feature_params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">maxCorners</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                      <span class="n">qualityLevel</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+                      <span class="n">minDistance</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+                      <span class="n">blockSize</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
 
-<span class="c1"># set up the ROI for tracking</span>
-<span class="n">roi</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">r</span><span class="p">:</span><span class="n">r</span><span class="o">+</span><span class="n">h</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span><span class="n">c</span><span class="o">+</span><span class="n">w</span><span class="p">]</span>
-<span class="n">hsv_roi</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">roi</span><span class="p">,</span> <span class="n">cv</span><span class="o">.</span><span class="n">COLOR_BGR2HSV</span><span class="p">)</span>
-<span class="n">mask</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">inRange</span><span class="p">(</span><span class="n">hsv_roi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">60.</span><span class="p">,</span> <span class="mf">32.</span><span class="p">)),</span> \
-                  <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mf">180.</span><span class="p">,</span> <span class="mf">255.</span><span class="p">,</span> <span class="mf">255.</span><span class="p">)))</span>
-<span class="n">roi_hist</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">calcHist</span><span class="p">([</span><span class="n">hsv_roi</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">mask</span><span class="p">,</span> <span class="p">[</span><span class="mi">180</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">180</span><span class="p">])</span>
-<span class="n">cv</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">roi_hist</span><span class="p">,</span> <span class="n">roi_hist</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="n">cv</span><span class="o">.</span><span class="n">NORM_MINMAX</span><span class="p">)</span>
+<span class="c1"># Parameters for Lucas Kanade optical flow</span>
+<span class="n">lk_params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">winSize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
+                 <span class="n">maxLevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                 <span class="n">criteria</span><span class="o">=</span><span class="p">(</span><span class="n">cv</span><span class="o">.</span><span class="n">TERM_CRITERIA_EPS</span> <span class="o">|</span> <span class="n">cv</span><span class="o">.</span><span class="n">TERM_CRITERIA_COUNT</span><span class="p">,</span>
+                           <span class="mi">10</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">))</span>
 
-<span class="c1"># setup the termination criteria, either 10 iteration or move by at least 1 pt</span>
-<span class="n">term_crit</span> <span class="o">=</span> <span class="p">(</span><span class="n">cv</span><span class="o">.</span><span class="n">TERM_CRITERIA_EPS</span> <span class="o">|</span> <span class="n">cv</span><span class="o">.</span><span class="n">TERM_CRITERIA_COUNT</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="c1"># Create some random colors</span>
+<span class="n">color</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+<span class="c1"># Take first frame and find corners in it</span>
+<span class="n">ret</span><span class="p">,</span> <span class="n">old_frame</span> <span class="o">=</span> <span class="n">cap</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="n">old_gray</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">old_frame</span><span class="p">,</span> <span class="n">cv</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>
+<span class="n">p0</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">goodFeaturesToTrack</span><span class="p">(</span><span class="n">old_gray</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">feature_params</span><span class="p">)</span>
+
+<span class="c1"># Create a mask image for drawing purposes</span>
+<span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">old_frame</span><span class="p">)</span>
 
 <span class="c1"># Define the codec and create VideoWriter object</span>
 <span class="n">fourcc</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">VideoWriter_fourcc</span><span class="p">(</span><span class="o">*</span><span class="s1">&#39;XVID&#39;</span><span class="p">)</span>
 <span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_WIDTH</span><span class="p">))</span>
 <span class="n">height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_HEIGHT</span><span class="p">))</span>
-<span class="n">outVideo</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">VideoWriter</span><span class="p">(</span><span class="s2">&quot;output-files/meanshift-res.avi&quot;</span><span class="p">,</span> \
+<span class="n">outVideo</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">VideoWriter</span><span class="p">(</span><span class="s2">&quot;output-files/LK-optical-flow-res.avi&quot;</span><span class="p">,</span> \
                           <span class="n">fourcc</span><span class="p">,</span> <span class="mf">25.0</span><span class="p">,</span> <span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">))</span>
 
 <span class="c1"># saved frame number</span>
@@ -11834,107 +11858,97 @@ div#notebook {
 
 <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
     <span class="n">ret</span><span class="p">,</span> <span class="n">frame</span> <span class="o">=</span> <span class="n">cap</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">ret</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
-        <span class="n">hsv</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">cv</span><span class="o">.</span><span class="n">COLOR_BGR2HSV</span><span class="p">)</span>
-        <span class="n">dst</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">calcBackProject</span><span class="p">([</span><span class="n">hsv</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">roi_hist</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">180</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">frame_gray</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">cv</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>
 
-        <span class="c1"># apply meanshift to get the new location</span>
-        <span class="n">ret</span><span class="p">,</span> <span class="n">track_window</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">meanShift</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">track_window</span><span class="p">,</span> <span class="n">term_crit</span><span class="p">)</span>
+    <span class="c1"># calculate optical flow</span>
+    <span class="n">p1</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">calcOpticalFlowPyrLK</span><span class="p">(</span><span class="n">old_gray</span><span class="p">,</span> <span class="n">frame_gray</span><span class="p">,</span> <span class="n">p0</span><span class="p">,</span>
+                                          <span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">lk_params</span><span class="p">)</span>
 
-        <span class="c1"># draw it on image</span>
-        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">track_window</span>
-        <span class="n">img2</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">rectangle</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">w</span><span class="p">,</span> <span class="n">y</span><span class="o">+</span><span class="n">h</span><span class="p">),</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="c1"># Select good points</span>
+    <span class="n">good_new</span> <span class="o">=</span> <span class="n">p1</span><span class="p">[</span><span class="n">st</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">good_old</span> <span class="o">=</span> <span class="n">p0</span><span class="p">[</span><span class="n">st</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
 
-        <span class="c1"># save the image and show it</span>
-        <span class="n">outVideo</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">img2</span><span class="p">)</span>
-        <span class="n">cv</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="s2">&quot;img2&quot;</span><span class="p">,</span> <span class="n">img2</span><span class="p">)</span>
-        <span class="n">k</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">waitKey</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span>
-        <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">27</span><span class="p">:</span>  <span class="c1"># press &quot;esc&quot; to exit</span>
-            <span class="k">break</span>
-        <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="mh">0x73</span><span class="p">:</span>  <span class="c1"># press &quot;s&quot; to save the current frame</span>
-            <span class="n">cv</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="s2">&quot;output-files/&quot;</span> <span class="o">+</span> <span class="s2">&quot;meanshift-res-&quot;</span> <span class="o">+</span> \
-                       <span class="nb">str</span><span class="p">(</span><span class="n">frame_number</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="n">img2</span><span class="p">)</span>
-            <span class="n">frame_number</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="k">else</span><span class="p">:</span>
+    <span class="c1"># draw the tracks</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">old</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">good_new</span><span class="p">,</span> <span class="n">good_old</span><span class="p">)):</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">old</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">),</span> <span class="n">color</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="mi">5</span><span class="p">,</span> <span class="n">color</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+
+    <span class="n">outVideo</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+    <span class="n">cv</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="s2">&quot;frame&quot;</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">waitKey</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xff</span>
+    <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">27</span><span class="p">:</span>  <span class="c1"># press &quot;esc&quot; to exit</span>
         <span class="k">break</span>
+    <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="mh">0x73</span><span class="p">:</span>  <span class="c1"># press &quot;s&quot; to save the current frame</span>
+        <span class="n">cv</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="s2">&quot;output-files/&quot;</span> <span class="o">+</span> <span class="s2">&quot;LK-optical-flow-res-&quot;</span> <span class="o">+</span> \
+                   <span class="nb">str</span><span class="p">(</span><span class="n">frame_number</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
+        <span class="n">frame_number</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># Now update the previous frame and previous points</span>
+    <span class="n">old_gray</span> <span class="o">=</span> <span class="n">frame_gray</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">p0</span> <span class="o">=</span> <span class="n">good_new</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">cv</span><span class="o">.</span><span class="n">destroyAllWindows</span><span class="p">()</span>
 <span class="n">cap</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
 </pre></div>
-<p>Three frames in a video I used is given below:</p>
-<p><img src="output-files/meanshift-result.png" alt="meanshift-result"></p>
-<h2 id="Camshift">Camshift<a class="anchor-link" href="#Camshift">&#182;</a></h2><p>Did you closely watch the last result? There is a problem. Our window always has the same size when car is farther away and it is very close to camera. That is not good. We need to adapt the window size with size and rotation of the target. Once again, the solution came from "OpenCV Labs" and it is called CAMshift (Continuously Adaptive Meanshift) published by Gary Bradsky in his paper "Computer Vision Face Tracking for Use in a Perceptual User Interface" in 1988.</p>
-<p>It applies meanshift first. Once meanshift converges, it updates the size of the window as, $ s = 2 \times \sqrt{\frac{M_{00}}{256}} $. It also calculates the orientation of best fitting ellipse to it. Again it applies the meanshift with new scaled search window and previous window location. The process is continued until required accuracy is met.</p>
-<p><img src="../../data/camshift-face.gif" alt="camshift-face"></p>
-<h3 id="Camshift-in-OpenCV">Camshift in OpenCV<a class="anchor-link" href="#Camshift-in-OpenCV">&#182;</a></h3><p>It is almost same as meanshift, but it returns a rotated rectangle (that is our result) and box parameters (used to be passed as search window in next iteration). See the code below:</p>
-<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">cv2</span> <span class="kn">as</span> <span class="nn">cv</span>
+<p>(This code doesn't check how correct are the next keypoints. So even if any feature point disappears in image, there is a chance that optical flow finds the next point which may look close to it. So actually for a robust tracking, corner points should be detected in particular intervals. OpenCV samples comes up with such a sample which finds the feature points at every 5 frames. It also run a backward-check of the optical flow points got to select only good ones. Check <a href="https://github.com/opencv/opencv/blob/master/samples/python/lk_track.py">samples/python/lk_track.py</a>.)</p>
+<p>See the results we got:</p>
+<p><img src="output-files/LK-optical-flow-result.png" alt="LK-optical-flow-result"></p>
+<h2 id="Dense-Optical-Flow-in-OpenCV">Dense Optical Flow in OpenCV<a class="anchor-link" href="#Dense-Optical-Flow-in-OpenCV">&#182;</a></h2><p>Lucas-Kanade method computes optical flow for a sparse feature set (in our example, corners detected using Shi-Tomasi algorithm). OpenCV provides another algorithm to find the dense optical flow. It computes the optical flow for all the points in the frame. It is based on Gunner Farneback's algorithm which is explained in <a href="http://www.diva-portal.org/smash/get/diva2:273847/FULLTEXT01.pdf">"Two-Frame Motion Estimation Based on Polynomial Expansion"</a> by <strong>Gunner Farneback</strong> in 2003.</p>
+<p>Below sample shows how to find the dense optical flow using above algorithm. We get a 2-channel array with optical flow vectors, $ (u,v) $. We find their magnitude and direction. We color code the result for better visualization. Direction corresponds to Hue value of the image. Magnitude corresponds to Value plane. See the code below:</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cv2</span> <span class="kn">as</span> <span class="nn">cv</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
-<span class="n">cap</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">VideoCapture</span><span class="p">(</span><span class="s2">&quot;../../data/slow.mp4&quot;</span><span class="p">)</span>
-<span class="c1"># take first frame of the video</span>
-<span class="n">ret</span><span class="p">,</span> <span class="n">frame</span> <span class="o">=</span> <span class="n">cap</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-
-<span class="c1"># setup initial location of window</span>
-<span class="n">r</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="mi">190</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">330</span><span class="p">,</span> <span class="mi">60</span>  <span class="c1"># simply hardcoded the values</span>
-<span class="n">track_window</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
-
-<span class="c1"># set up the ROI for tracking</span>
-<span class="n">roi</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">r</span><span class="p">:</span><span class="n">r</span><span class="o">+</span><span class="n">h</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span><span class="n">c</span><span class="o">+</span><span class="n">w</span><span class="p">]</span>
-<span class="n">hsv_roi</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">roi</span><span class="p">,</span> <span class="n">cv</span><span class="o">.</span><span class="n">COLOR_BGR2HSV</span><span class="p">)</span>
-<span class="n">mask</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">inRange</span><span class="p">(</span><span class="n">hsv_roi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">60.</span><span class="p">,</span> <span class="mf">32.</span><span class="p">)),</span> \
-                  <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mf">180.</span><span class="p">,</span> <span class="mf">255.</span><span class="p">,</span> <span class="mf">255.</span><span class="p">)))</span>
-<span class="n">roi_hist</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">calcHist</span><span class="p">([</span><span class="n">hsv_roi</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">mask</span><span class="p">,</span> <span class="p">[</span><span class="mi">180</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">180</span><span class="p">])</span>
-<span class="n">cv</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">roi_hist</span><span class="p">,</span> <span class="n">roi_hist</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="n">cv</span><span class="o">.</span><span class="n">NORM_MINMAX</span><span class="p">)</span>
-
-<span class="c1"># setup the termination criteria, either 10 iteration or move by at least 1 pt</span>
-<span class="n">term_crit</span> <span class="o">=</span> <span class="p">(</span><span class="n">cv</span><span class="o">.</span><span class="n">TERM_CRITERIA_EPS</span> <span class="o">|</span> <span class="n">cv</span><span class="o">.</span><span class="n">TERM_CRITERIA_COUNT</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">cap</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">VideoCapture</span><span class="p">(</span><span class="s2">&quot;../../data/vtest.avi&quot;</span><span class="p">)</span>
+<span class="n">ret</span><span class="p">,</span> <span class="n">frame1</span> <span class="o">=</span> <span class="n">cap</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="n">prvs</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">frame1</span><span class="p">,</span> <span class="n">cv</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>
+<span class="n">hsv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">frame1</span><span class="p">)</span>
+<span class="n">hsv</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">255</span>
 
 <span class="c1"># Define the codec and create VideoWriter object</span>
 <span class="n">fourcc</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">VideoWriter_fourcc</span><span class="p">(</span><span class="o">*</span><span class="s1">&#39;XVID&#39;</span><span class="p">)</span>
 <span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_WIDTH</span><span class="p">))</span>
 <span class="n">height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_HEIGHT</span><span class="p">))</span>
-<span class="n">outVideo</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">VideoWriter</span><span class="p">(</span><span class="s2">&quot;output-files/camshift-res.avi&quot;</span><span class="p">,</span> \
+<span class="n">outVideo</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">VideoWriter</span><span class="p">(</span><span class="s2">&quot;output-files/dense-optical-flow-res.avi&quot;</span><span class="p">,</span> \
                           <span class="n">fourcc</span><span class="p">,</span> <span class="mf">25.0</span><span class="p">,</span> <span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">))</span>
 
 <span class="c1"># saved frame number</span>
 <span class="n">frame_number</span> <span class="o">=</span> <span class="mi">0</span>
 
 <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
-    <span class="n">ret</span><span class="p">,</span> <span class="n">frame</span> <span class="o">=</span> <span class="n">cap</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">ret</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
-        <span class="n">hsv</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">cv</span><span class="o">.</span><span class="n">COLOR_BGR2HSV</span><span class="p">)</span>
-        <span class="n">dst</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">calcBackProject</span><span class="p">([</span><span class="n">hsv</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">roi_hist</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">180</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">ret</span><span class="p">,</span> <span class="n">frame2</span> <span class="o">=</span> <span class="n">cap</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="nb">next</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">frame2</span><span class="p">,</span> <span class="n">cv</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>
+    <span class="n">flow</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">calcOpticalFlowFarneback</span><span class="p">(</span><span class="n">prvs</span><span class="p">,</span> <span class="nb">next</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> \
+                                       <span class="mf">0.5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">mag</span><span class="p">,</span> <span class="n">ang</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">cartToPolar</span><span class="p">(</span><span class="n">flow</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">flow</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">hsv</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ang</span> <span class="o">*</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">hsv</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">mag</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="n">cv</span><span class="o">.</span><span class="n">NORM_MINMAX</span><span class="p">)</span>
+    <span class="n">bgr</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">hsv</span><span class="p">,</span> <span class="n">cv</span><span class="o">.</span><span class="n">COLOR_HSV2BGR</span><span class="p">)</span>
 
-        <span class="c1"># apply camshift to get the new location</span>
-        <span class="n">ret</span><span class="p">,</span> <span class="n">track_window</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">CamShift</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">track_window</span><span class="p">,</span> <span class="n">term_crit</span><span class="p">)</span>
-
-        <span class="c1"># Draw it on image</span>
-        <span class="n">pts</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">boxPoints</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
-        <span class="n">pts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int0</span><span class="p">(</span><span class="n">pts</span><span class="p">)</span>
-        <span class="n">img2</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">polylines</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="p">[</span><span class="n">pts</span><span class="p">],</span> <span class="bp">True</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
-
-        <span class="c1"># save the image and show it</span>
-        <span class="n">outVideo</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">img2</span><span class="p">)</span>
-        <span class="n">cv</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="s1">&#39;img2&#39;</span><span class="p">,</span><span class="n">img2</span><span class="p">)</span>
-        <span class="n">k</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">waitKey</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span>
-        <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">27</span><span class="p">:</span>  <span class="c1"># press &quot;esc&quot; to exit</span>
-            <span class="k">break</span>
-        <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="mh">0x73</span><span class="p">:</span>  <span class="c1"># press &quot;s&quot; to save the current frame</span>
-            <span class="n">cv</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="s2">&quot;output-files/&quot;</span> <span class="o">+</span> <span class="s2">&quot;camshift-res-&quot;</span> <span class="o">+</span> \
-                       <span class="nb">str</span><span class="p">(</span><span class="n">frame_number</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="n">img2</span><span class="p">)</span>
-            <span class="n">frame_number</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="k">else</span><span class="p">:</span>
+    <span class="c1"># save the image and show it</span>
+    <span class="n">outVideo</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">bgr</span><span class="p">)</span>
+    <span class="n">cv</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="s2">&quot;frame&quot;</span><span class="p">,</span> <span class="n">frame2</span><span class="p">)</span>
+    <span class="n">cv</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="s2">&quot;flow&quot;</span><span class="p">,</span> <span class="n">bgr</span><span class="p">)</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">waitKey</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xff</span>
+    <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">27</span><span class="p">:</span>  <span class="c1"># press &quot;esc&quot; to exit</span>
         <span class="k">break</span>
-<span class="n">cv</span><span class="o">.</span><span class="n">destroyAllWindows</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="nb">ord</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">):</span>  <span class="c1"># press &quot;s&quot; to save current frame and result for it</span>
+        <span class="n">cv</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="s2">&quot;output-files/&quot;</span> <span class="o">+</span> <span class="s2">&quot;dense-optical-flow-src-&quot;</span> <span class="o">+</span> \
+                   <span class="nb">str</span><span class="p">(</span><span class="n">frame_number</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="n">frame2</span><span class="p">)</span>
+        <span class="n">cv</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="s2">&quot;output-files/&quot;</span> <span class="o">+</span> <span class="s2">&quot;dense-optical-flow-res-&quot;</span> <span class="o">+</span> \
+                   <span class="nb">str</span><span class="p">(</span><span class="n">frame_number</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="n">bgr</span><span class="p">)</span>
+        <span class="n">frame_number</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">prvs</span> <span class="o">=</span> <span class="nb">next</span>
 <span class="n">cap</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+<span class="n">cv</span><span class="o">.</span><span class="n">destroyAllWindows</span><span class="p">()</span>
 </pre></div>
-<p>Three frames of the result is shown below:</p>
-<p><img src="output-files/camshift-result.png" alt="camshift-result"></p>
-<h2 id="Additional-Resources">Additional Resources<a class="anchor-link" href="#Additional-Resources">&#182;</a></h2><ol>
-<li>French Wikipedia page on Camshift. (The two animations are taken from here)</li>
-<li>Bradski, G.R., "Real time face and object tracking as a component of a perceptual user interface," Applications of Computer Vision, 1998. WACV '98. Proceedings., Fourth IEEE Workshop on , vol., no., pp.214,219, 19-21 Oct 1998</li>
-</ol>
+<p>See the result below:</p>
+<p><img src="output-files/dense-optical-flow-result.png" alt="dense-optical-flow-result"></p>
+<p>OpenCV comes with a more advanced sample on dense optical flow, please see <a href="https://github.com/opencv/opencv/blob/master/samples/python/opt_flow.py">samples/python/opt_flow.py</a>.</p>
 <h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2><ol>
-<li>OpenCV comes with a Python sample on interactive demo of camshift. Use it, hack it, understand it. </li>
+<li>Check the code in samples/python/lk_track.py. Try to understand the code.</li>
+<li>Check the code in samples/python/opt_flow.py. Try to understand the code.</li>
 </ol>
 
 </div>
