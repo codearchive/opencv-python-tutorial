@@ -11823,7 +11823,7 @@ div#notebook {
 
 <span class="n">cap</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">VideoCapture</span><span class="p">(</span><span class="s2">&quot;../../data/slow.mp4&quot;</span><span class="p">)</span>
 
-<span class="c1"># params for Shi-Tomasi corner detection</span>
+<span class="c1"># Params for Shi-Tomasi corner detection</span>
 <span class="n">feature_params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">maxCorners</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
                       <span class="n">qualityLevel</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
                       <span class="n">minDistance</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
@@ -11850,17 +11850,17 @@ div#notebook {
 <span class="n">fourcc</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">VideoWriter_fourcc</span><span class="p">(</span><span class="o">*</span><span class="s1">&#39;XVID&#39;</span><span class="p">)</span>
 <span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_WIDTH</span><span class="p">))</span>
 <span class="n">height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_HEIGHT</span><span class="p">))</span>
-<span class="n">outVideo</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">VideoWriter</span><span class="p">(</span><span class="s2">&quot;output-files/LK-optical-flow-res.avi&quot;</span><span class="p">,</span> \
-                          <span class="n">fourcc</span><span class="p">,</span> <span class="mf">25.0</span><span class="p">,</span> <span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">))</span>
+<span class="n">outVideo</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">VideoWriter</span><span class="p">(</span><span class="s2">&quot;output-files/LK-optical-flow-res.avi&quot;</span><span class="p">,</span>
+                          <span class="n">fourcc</span><span class="p">,</span> <span class="mf">25.0</span><span class="p">,</span> <span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">),</span> <span class="bp">True</span><span class="p">)</span>
 
-<span class="c1"># saved frame number</span>
+<span class="c1"># Saved frame number</span>
 <span class="n">frame_number</span> <span class="o">=</span> <span class="mi">0</span>
 
 <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
     <span class="n">ret</span><span class="p">,</span> <span class="n">frame</span> <span class="o">=</span> <span class="n">cap</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
     <span class="n">frame_gray</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">cv</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>
 
-    <span class="c1"># calculate optical flow</span>
+    <span class="c1"># Calculate optical flow</span>
     <span class="n">p1</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">calcOpticalFlowPyrLK</span><span class="p">(</span><span class="n">old_gray</span><span class="p">,</span> <span class="n">frame_gray</span><span class="p">,</span> <span class="n">p0</span><span class="p">,</span>
                                           <span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">lk_params</span><span class="p">)</span>
 
@@ -11868,7 +11868,7 @@ div#notebook {
     <span class="n">good_new</span> <span class="o">=</span> <span class="n">p1</span><span class="p">[</span><span class="n">st</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
     <span class="n">good_old</span> <span class="o">=</span> <span class="n">p0</span><span class="p">[</span><span class="n">st</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
 
-    <span class="c1"># draw the tracks</span>
+    <span class="c1"># Draw the tracks</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">old</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">good_new</span><span class="p">,</span> <span class="n">good_old</span><span class="p">)):</span>
         <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
         <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">old</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
@@ -11876,21 +11876,23 @@ div#notebook {
         <span class="n">frame</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="mi">5</span><span class="p">,</span> <span class="n">color</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">img</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
 
+    <span class="c1"># Save the image and show it</span>
     <span class="n">outVideo</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
     <span class="n">cv</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="s2">&quot;frame&quot;</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
     <span class="n">k</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">waitKey</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xff</span>
-    <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">27</span><span class="p">:</span>  <span class="c1"># press &quot;esc&quot; to exit</span>
+    <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">27</span><span class="p">:</span>  <span class="c1"># Press &quot;esc&quot; to exit</span>
         <span class="k">break</span>
-    <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="mh">0x73</span><span class="p">:</span>  <span class="c1"># press &quot;s&quot; to save the current frame</span>
-        <span class="n">cv</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="s2">&quot;output-files/&quot;</span> <span class="o">+</span> <span class="s2">&quot;LK-optical-flow-res-&quot;</span> <span class="o">+</span> \
+    <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="mh">0x73</span><span class="p">:</span>  <span class="c1"># Press &quot;s&quot; to save the current frame</span>
+        <span class="n">cv</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="s2">&quot;output-files/&quot;</span> <span class="o">+</span> <span class="s2">&quot;LK-optical-flow-res-&quot;</span> <span class="o">+</span>
                    <span class="nb">str</span><span class="p">(</span><span class="n">frame_number</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
         <span class="n">frame_number</span> <span class="o">+=</span> <span class="mi">1</span>
 
     <span class="c1"># Now update the previous frame and previous points</span>
     <span class="n">old_gray</span> <span class="o">=</span> <span class="n">frame_gray</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">p0</span> <span class="o">=</span> <span class="n">good_new</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<span class="n">cv</span><span class="o">.</span><span class="n">destroyAllWindows</span><span class="p">()</span>
+<span class="n">outVideo</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
 <span class="n">cap</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+<span class="n">cv</span><span class="o">.</span><span class="n">destroyAllWindows</span><span class="p">()</span>
 </pre></div>
 <p>(This code doesn't check how correct are the next keypoints. So even if any feature point disappears in image, there is a chance that optical flow finds the next point which may look close to it. So actually for a robust tracking, corner points should be detected in particular intervals. OpenCV samples comes up with such a sample which finds the feature points at every 5 frames. It also run a backward-check of the optical flow points got to select only good ones. Check <a href="https://github.com/opencv/opencv/blob/master/samples/python/lk_track.py">samples/python/lk_track.py</a>.)</p>
 <p>See the results we got:</p>
@@ -11910,45 +11912,46 @@ div#notebook {
 <span class="n">fourcc</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">VideoWriter_fourcc</span><span class="p">(</span><span class="o">*</span><span class="s1">&#39;XVID&#39;</span><span class="p">)</span>
 <span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_WIDTH</span><span class="p">))</span>
 <span class="n">height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_HEIGHT</span><span class="p">))</span>
-<span class="n">outVideo</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">VideoWriter</span><span class="p">(</span><span class="s2">&quot;output-files/dense-optical-flow-res.avi&quot;</span><span class="p">,</span> \
-                          <span class="n">fourcc</span><span class="p">,</span> <span class="mf">25.0</span><span class="p">,</span> <span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">))</span>
+<span class="n">outVideo</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">VideoWriter</span><span class="p">(</span><span class="s2">&quot;output-files/dense-optical-flow-res.avi&quot;</span><span class="p">,</span>
+                          <span class="n">fourcc</span><span class="p">,</span> <span class="mf">25.0</span><span class="p">,</span> <span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">),</span> <span class="bp">True</span><span class="p">)</span>
 
-<span class="c1"># saved frame number</span>
+<span class="c1"># Saved frame number</span>
 <span class="n">frame_number</span> <span class="o">=</span> <span class="mi">0</span>
 
 <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
     <span class="n">ret</span><span class="p">,</span> <span class="n">frame2</span> <span class="o">=</span> <span class="n">cap</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
     <span class="nb">next</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">frame2</span><span class="p">,</span> <span class="n">cv</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>
-    <span class="n">flow</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">calcOpticalFlowFarneback</span><span class="p">(</span><span class="n">prvs</span><span class="p">,</span> <span class="nb">next</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> \
+    <span class="n">flow</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">calcOpticalFlowFarneback</span><span class="p">(</span><span class="n">prvs</span><span class="p">,</span> <span class="nb">next</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
                                        <span class="mf">0.5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     <span class="n">mag</span><span class="p">,</span> <span class="n">ang</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">cartToPolar</span><span class="p">(</span><span class="n">flow</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">flow</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
     <span class="n">hsv</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ang</span> <span class="o">*</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span>
     <span class="n">hsv</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">mag</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="n">cv</span><span class="o">.</span><span class="n">NORM_MINMAX</span><span class="p">)</span>
     <span class="n">bgr</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">hsv</span><span class="p">,</span> <span class="n">cv</span><span class="o">.</span><span class="n">COLOR_HSV2BGR</span><span class="p">)</span>
 
-    <span class="c1"># save the image and show it</span>
+    <span class="c1"># Save the image and show it</span>
     <span class="n">outVideo</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">bgr</span><span class="p">)</span>
     <span class="n">cv</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="s2">&quot;frame&quot;</span><span class="p">,</span> <span class="n">frame2</span><span class="p">)</span>
     <span class="n">cv</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="s2">&quot;flow&quot;</span><span class="p">,</span> <span class="n">bgr</span><span class="p">)</span>
     <span class="n">k</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">waitKey</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xff</span>
-    <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">27</span><span class="p">:</span>  <span class="c1"># press &quot;esc&quot; to exit</span>
+    <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">27</span><span class="p">:</span>  <span class="c1"># Press &quot;esc&quot; to exit</span>
         <span class="k">break</span>
-    <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="nb">ord</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">):</span>  <span class="c1"># press &quot;s&quot; to save current frame and result for it</span>
-        <span class="n">cv</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="s2">&quot;output-files/&quot;</span> <span class="o">+</span> <span class="s2">&quot;dense-optical-flow-src-&quot;</span> <span class="o">+</span> \
+    <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="nb">ord</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">):</span>  <span class="c1"># Press &quot;s&quot; to save current frame and result for it</span>
+        <span class="n">cv</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="s2">&quot;output-files/&quot;</span> <span class="o">+</span> <span class="s2">&quot;dense-optical-flow-src-&quot;</span> <span class="o">+</span>
                    <span class="nb">str</span><span class="p">(</span><span class="n">frame_number</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="n">frame2</span><span class="p">)</span>
-        <span class="n">cv</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="s2">&quot;output-files/&quot;</span> <span class="o">+</span> <span class="s2">&quot;dense-optical-flow-res-&quot;</span> <span class="o">+</span> \
+        <span class="n">cv</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="s2">&quot;output-files/&quot;</span> <span class="o">+</span> <span class="s2">&quot;dense-optical-flow-res-&quot;</span> <span class="o">+</span>
                    <span class="nb">str</span><span class="p">(</span><span class="n">frame_number</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="n">bgr</span><span class="p">)</span>
         <span class="n">frame_number</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="n">prvs</span> <span class="o">=</span> <span class="nb">next</span>
 <span class="n">cap</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+<span class="n">outVideo</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
 <span class="n">cv</span><span class="o">.</span><span class="n">destroyAllWindows</span><span class="p">()</span>
 </pre></div>
 <p>See the result below:</p>
 <p><img src="output-files/dense-optical-flow-result.png" alt="dense-optical-flow-result"></p>
 <p>OpenCV comes with a more advanced sample on dense optical flow, please see <a href="https://github.com/opencv/opencv/blob/master/samples/python/opt_flow.py">samples/python/opt_flow.py</a>.</p>
 <h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2><ol>
-<li>Check the code in samples/python/lk_track.py. Try to understand the code.</li>
-<li>Check the code in samples/python/opt_flow.py. Try to understand the code.</li>
+<li>Check the code in <a href="https://github.com/opencv/opencv/blob/master/samples/python/lk_track.py">samples/python/lk_track.py</a>. Try to understand the code.</li>
+<li>Check the code in <a href="https://github.com/opencv/opencv/blob/master/samples/python/opt_flow.py">samples/python/opt_flow.py</a>. Try to understand the code.</li>
 </ol>
 
 </div>

@@ -23,6 +23,7 @@
 - [Video Analysis](video-analysis)
   - [Meanshift and Camshift](video-analysis/meanshift-camshift)
   - [Optical Flow](video-analysis/optical-flow)
+  - [Background Subtraction](video-analysis/background-subtraction)
 
 ## Introduction to OpenCV
 

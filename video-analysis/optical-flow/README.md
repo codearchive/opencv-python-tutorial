@@ -75,7 +75,7 @@ import cv2 as cv
 
 cap = cv.VideoCapture("../../data/slow.mp4")
 
-# params for Shi-Tomasi corner detection
+# Params for Shi-Tomasi corner detection
 feature_params = dict(maxCorners=100,
                       qualityLevel=0.3,
                       minDistance=7,
@@ -102,17 +102,17 @@ mask = np.zeros_like(old_frame)
 fourcc = cv.VideoWriter_fourcc(*'XVID')
 width = int(cap.get(cv.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
-outVideo = cv.VideoWriter("output-files/LK-optical-flow-res.avi", \
-                          fourcc, 25.0, (width, height))
+outVideo = cv.VideoWriter("output-files/LK-optical-flow-res.avi",
+                          fourcc, 25.0, (width, height), True)
 
-# saved frame number
+# Saved frame number
 frame_number = 0
 
 while True:
     ret, frame = cap.read()
     frame_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
 
-    # calculate optical flow
+    # Calculate optical flow
     p1, st, err = cv.calcOpticalFlowPyrLK(old_gray, frame_gray, p0,
                                           None, **lk_params)
 
@@ -120,7 +120,7 @@ while True:
     good_new = p1[st == 1]
     good_old = p0[st == 1]
 
-    # draw the tracks
+    # Draw the tracks
     for i, (new, old) in enumerate(zip(good_new, good_old)):
         a, b = new.ravel()
         c, d = old.ravel()
@@ -128,21 +128,23 @@ while True:
         frame = cv.circle(frame, (a, b), 5, color[i].tolist(), -1)
     img = cv.add(frame, mask)
 
+    # Save the image and show it
     outVideo.write(img)
     cv.imshow("frame", img)
     k = cv.waitKey(30) & 0xff
-    if k == 27:  # press "esc" to exit
+    if k == 27:  # Press "esc" to exit
         break
-    elif k == 0x73:  # press "s" to save the current frame
-        cv.imwrite("output-files/" + "LK-optical-flow-res-" + \
+    elif k == 0x73:  # Press "s" to save the current frame
+        cv.imwrite("output-files/" + "LK-optical-flow-res-" +
                    str(frame_number) + ".png", img)
         frame_number += 1
 
     # Now update the previous frame and previous points
     old_gray = frame_gray.copy()
     p0 = good_new.reshape(-1, 1, 2)
-cv.destroyAllWindows()
+outVideo.release()
 cap.release()
+cv.destroyAllWindows()
 ```
 
 (This code doesn't check how correct are the next keypoints. So even if any feature point disappears in image, there is a chance that optical flow finds the next point which may look close to it. So actually for a robust tracking, corner points should be detected in particular intervals. OpenCV samples comes up with such a sample which finds the feature points at every 5 frames. It also run a backward-check of the optical flow points got to select only good ones. Check [samples/python/lk_track.py](https://github.com/opencv/opencv/blob/master/samples/python/lk_track.py).)
@@ -171,37 +173,38 @@ hsv[..., 1] = 255
 fourcc = cv.VideoWriter_fourcc(*'XVID')
 width = int(cap.get(cv.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
-outVideo = cv.VideoWriter("output-files/dense-optical-flow-res.avi", \
-                          fourcc, 25.0, (width, height))
+outVideo = cv.VideoWriter("output-files/dense-optical-flow-res.avi",
+                          fourcc, 25.0, (width, height), True)
 
-# saved frame number
+# Saved frame number
 frame_number = 0
 
 while True:
     ret, frame2 = cap.read()
     next = cv.cvtColor(frame2, cv.COLOR_BGR2GRAY)
-    flow = cv.calcOpticalFlowFarneback(prvs, next, None, \
+    flow = cv.calcOpticalFlowFarneback(prvs, next, None,
                                        0.5, 3, 15, 3, 5, 1.2, 0)
     mag, ang = cv.cartToPolar(flow[..., 0], flow[..., 1])
     hsv[..., 0] = ang * 180 / np.pi / 2
     hsv[..., 2] = cv.normalize(mag, None, 0, 255, cv.NORM_MINMAX)
     bgr = cv.cvtColor(hsv, cv.COLOR_HSV2BGR)
 
-    # save the image and show it
+    # Save the image and show it
     outVideo.write(bgr)
     cv.imshow("frame", frame2)
     cv.imshow("flow", bgr)
     k = cv.waitKey(30) & 0xff
-    if k == 27:  # press "esc" to exit
+    if k == 27:  # Press "esc" to exit
         break
-    elif k == ord('s'):  # press "s" to save current frame and result for it
-        cv.imwrite("output-files/" + "dense-optical-flow-src-" + \
+    elif k == ord('s'):  # Press "s" to save current frame and result for it
+        cv.imwrite("output-files/" + "dense-optical-flow-src-" +
                    str(frame_number) + ".png", frame2)
-        cv.imwrite("output-files/" + "dense-optical-flow-res-" + \
+        cv.imwrite("output-files/" + "dense-optical-flow-res-" +
                    str(frame_number) + ".png", bgr)
         frame_number += 1
     prvs = next
 cap.release()
+outVideo.release()
 cv.destroyAllWindows()
 ```
 
@@ -213,6 +216,6 @@ OpenCV comes with a more advanced sample on dense optical flow, please see [samp
 
 ## Exercises
 
-1. Check the code in samples/python/lk_track.py. Try to understand the code.
-2. Check the code in samples/python/opt_flow.py. Try to understand the code.
+1. Check the code in [samples/python/lk_track.py](https://github.com/opencv/opencv/blob/master/samples/python/lk_track.py). Try to understand the code.
+2. Check the code in [samples/python/opt_flow.py](https://github.com/opencv/opencv/blob/master/samples/python/opt_flow.py). Try to understand the code.
 
