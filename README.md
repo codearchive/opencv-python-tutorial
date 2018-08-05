@@ -24,6 +24,8 @@
   - [Meanshift and Camshift](video-analysis/meanshift-camshift)
   - [Optical Flow](video-analysis/optical-flow)
   - [Background Subtraction](video-analysis/background-subtraction)
+- [Camera Calibration and 3D Reconstruction](calibration-reconstruction)
+  - [Camera Calibration](calibration-reconstruction/camera-calibration)
 
 ## Introduction to OpenCV
 
