@@ -6,26 +6,30 @@
 
 - [Introduction to OpenCV](#Introduction-to-OpenCV)
   - [Instruction to Install OpenCV-Python](#Instruction-to-Install-OpenCV-Python)
+  - [Main Resources](#Main-Resources)
   - [Additional Resources](#Additional-Resources)
 - [Image Processing in OpenCV](image-processing)
   - [Interactive Foreground Extraction using GrabCut Algorithm]()
-- [Feature Detection and Description](feature-detection-and-description)
-  - [Understanding Features](feature-detection-and-description/#Understanding-Features)  
-  - [Harris Corner Detection](feature-detection-and-description/harris-corner-detection)
-  - [Shi-Tomasi Corner Detector & Good Features to Track](feature-detection-and-description/shi-tomasi-detector)
-  - [Introduction to SIFT (Scale-Invariant Feature Transform)](feature-detection-and-description/SIFT)
-  - [Introduction to SURF (Speeded-Up Robust Features)](feature-detection-and-description/SURF)
-  - [FAST Algorithm for Corner Detection](feature-detection-and-description/FAST)
-  - [BRIEF (Binary Robust Independent Elementary Features)](feature-detection-and-description/BRIEF)
-  - [ORB (Oriented FAST and Rotated BRIEF)](feature-detection-and-description/ORB)
-  - [Feature Matching](feature-detection-and-description/feature-matching)
-  - [Feature Matching + Homography to find Objects](feature-detection-and-description/homography)
+- [Feature Detection and Description](feature-detection-description)
+  - [Understanding Features](feature-detection-description/#Understanding-Features)  
+  - [Harris Corner Detection](feature-detection-description/harris-corner-detection)
+  - [Shi-Tomasi Corner Detector & Good Features to Track](feature-detection-description/shi-tomasi-detector)
+  - [Introduction to SIFT (Scale-Invariant Feature Transform)](feature-detection-description/SIFT)
+  - [Introduction to SURF (Speeded-Up Robust Features)](feature-detection-description/SURF)
+  - [FAST Algorithm for Corner Detection](feature-detection-description/FAST)
+  - [BRIEF (Binary Robust Independent Elementary Features)](feature-detection-description/BRIEF)
+  - [ORB (Oriented FAST and Rotated BRIEF)](feature-detection-description/ORB)
+  - [Feature Matching](feature-detection-description/feature-matching)
+  - [Feature Matching + Homography to find Objects](feature-detection-description/homography)
 - [Video Analysis](video-analysis)
   - [Meanshift and Camshift](video-analysis/meanshift-camshift)
   - [Optical Flow](video-analysis/optical-flow)
   - [Background Subtraction](video-analysis/background-subtraction)
 - [Camera Calibration and 3D Reconstruction](calibration-reconstruction)
   - [Camera Calibration](calibration-reconstruction/camera-calibration)
+  - [Pose Estimation](calibration-reconstruction/pose-estimation)
+  - [Epipolar Geometry](calibration-reconstruction/epipolar-geometry)
+  - [Depth Map from Stereo Images](calibration-reconstruction/depth-map)
 
 ## Introduction to OpenCV
 
@@ -58,10 +62,16 @@ Prior knowledge of Python and Numpy is recommended as they won't be covered in t
 - [Windows](https://docs.opencv.org/3.4.1/d5/de5/tutorial_py_setup_in_windows.html)
 - [Ubuntu](https://docs.opencv.org/3.4.1/d2/de6/tutorial_py_setup_in_ubuntu.html)
 
+### Main Resources
+
+- [OpenCV Homepage](https://opencv.org/)
+- [OpenCV Documentation](https://docs.opencv.org/)
+- [OpenCV Forum](http://answers.opencv.org/questions/)
+- [Issue Tracking](https://github.com/opencv/opencv/issues)
+
 ### Additional Resources
+
 - [A Byte of Python](https://python.swaroopch.com/)
 - [Basic Numpy Tutorials](http://scipy.github.io/old-wiki/pages/Tentative_NumPy_Tutorial)
 - [Numpy Examples List](http://scipy.github.io/old-wiki/pages/Numpy_Example_List)
 - [Matplotlib Tutorials](https://matplotlib.org/tutorials/index.html)
-- [OpenCV Documentation](https://docs.opencv.org/)
-- [OpenCV Forum](http://answers.opencv.org/questions/)

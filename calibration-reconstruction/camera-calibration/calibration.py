@@ -62,3 +62,6 @@ for i in range(len(objpoints)):
     error = cv.norm(imgpoints[i], imgpoints2, cv.NORM_L2) / len(imgpoints2)
     mean_error += error
 print("total error: {}".format(mean_error/len(objpoints)))
+
+np.save("../../data/calib-data-mtx", mtx)
+np.save("../../data/calib-data-dist", dist)
